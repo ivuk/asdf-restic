@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+install_restic() {
+  local install_type=$1
+  local version=$2
+  local install_path=$3
+  local platform="$(uname | tr '[:upper:]' '[:lower:]')_amd64"
+  local bin_install_path="$install_path/bin"
+  local binary_path="$bin_install_path/restic"
+  local download_url=$(get_download_url $version $platform)
+  local filename="$(get_filename $version $platform)"
+
+  if [ "$TMPDIR" = "" ]; then
+    local tmp_download_dir=$(mktemp -d -t restic_XXXXXX)
+  else
+    local tmp_download_dir=$TMPDIR
+  fi
+
+  local download_path="$tmp_download_dir/$(get_filename $version $platform)"
+
+  echo "Downloading restic from ${download_url} to ${download_path}"
+  curl -Lo $download_path $download_url
+
+  echo "Creating bin directory"
+  mkdir -p "${bin_install_path}"
+
+  echo "Cleaning previous binaries"
+  rm -f $binary_path 2>/dev/null || true
+
+  echo "Copying binary"
+  bunzip2 $tmp_download_dir/$filename
+  cp  $tmp_download_dir/restic_v${version}_${platform} ${bin_install_path}/restic
+  chmod +x ${binary_path}
+}
+
+get_filename() {
+  local version="$1"
+  local platform="$2"
+
+  echo "restic_v${version}_${platform}.bz2"
+}
+
+get_download_url() {
+  local version="$1"
+  local platform="$2"
+  local filename="$(get_filename $version $platform)"
+  echo "https://github.com/restic/restic/releases/download/v${version}/restic_${version}_${platform}.bz2"
+}
+
+install_restic $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
