@@ -1,7 +1,5 @@
 # asdf-restic
 
-[![Build Status](https://travis-ci.org/ivuk/asdf-restic.svg?branch=master)](https://travis-ci.org/ivuk/asdf-restic)
-
 restic plugin for [asdf](https://github.com/asdf-vm/asdf) version manager, inspired by [asdf-helm](https://github.com/Antiarchitect/asdf-helm)
 
 ## Install
